@@ -1,49 +1,29 @@
 import xtype from 'xtypejs'
 xtype.options.setNameScheme('compact')
 
-export default class Ensure {
-  constructor (r) {
-    this.r = r
-  }
+export let ensureNewDb = (dbName) => {
+  r.branch(
+    r.dbList().contains(dbName),
+    r.branch(
+      r.dbDrop(dbName),
+      r.dbCreate(dbName),
+      false
+    ),
+    r.dbCreate(dbName)
+  )
+  return r.db(dbName)
+}
 
-  async db (dbName) {
-    if (xtype.is(dbName, 'str')) {
-      let dbList = await this.r.dbList()
-      if (dbList.indexOf(dbName) === -1) {
-        return await this.r.dbCreate(dbName)
-      } else {
-        return 'exists'
-      }
-    } else {
-      throw Error('arguments length error')
-    }
-  }
+export let ensureDb = (dbName) => {
+  return r.branch(
+    r.dbList().contains(dbName),
+    true,
+    r.dbCreate(dbName)
+  )
+}
 
-  async table (dbName, tableName) {
-    if (tableName) {
-      let tableList = await this.r.db(dbName).tableList()
-      if (tableList.indexOf(tableName) === -1) {
-        return await this.r.db(dbName).tableCreate(tableName)
-      } else {
-        return 'exists'
-      }
-    } else {
-      throw Error('arguments length error')
-    }
-  }
+export let ensureTable = (tableName) => {
+}
 
-  async index (dbName, tableName, indexName) {
-    if (indexName) {
-      let indexList = await this.r.db(dbName).table(tableName).indexList()
-      if (indexList.indexOf(indexName) === -1) {
-        let create = await this.r.db(dbName).table(tableName).indexCreate(indexName)
-        await this.r.db(dbName).table(tableName).indexWait(indexName)
-        return create
-      } else {
-        return 'exists'
-      }
-    } else {
-      throw Error('arguments length error')
-    }
-  }
+export let ensureIndex = (indexName) => {
 }
