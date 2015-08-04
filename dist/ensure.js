@@ -6,15 +6,7 @@ Object.defineProperty(exports, '__esModule', {
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var _xtypejs = require('xtypejs');
-
-var _xtypejs2 = _interopRequireDefault(_xtypejs);
-
-_xtypejs2['default'].options.setNameScheme('compact');
 
 var Ensure = (function () {
   function Ensure(r) {
@@ -25,143 +17,28 @@ var Ensure = (function () {
 
   _createClass(Ensure, [{
     key: 'db',
-    value: function db(dbName) {
-      var dbList;
-      return regeneratorRuntime.async(function db$(context$2$0) {
-        while (1) switch (context$2$0.prev = context$2$0.next) {
-          case 0:
-            if (!_xtypejs2['default'].is(dbName, 'str')) {
-              context$2$0.next = 13;
-              break;
-            }
-
-            context$2$0.next = 3;
-            return regeneratorRuntime.awrap(this.r.dbList());
-
-          case 3:
-            dbList = context$2$0.sent;
-
-            if (!(dbList.indexOf(dbName) === -1)) {
-              context$2$0.next = 10;
-              break;
-            }
-
-            context$2$0.next = 7;
-            return regeneratorRuntime.awrap(this.r.dbCreate(dbName));
-
-          case 7:
-            return context$2$0.abrupt('return', context$2$0.sent);
-
-          case 10:
-            return context$2$0.abrupt('return', 'exists');
-
-          case 11:
-            context$2$0.next = 14;
-            break;
-
-          case 13:
-            throw Error('arguments length error');
-
-          case 14:
-          case 'end':
-            return context$2$0.stop();
-        }
-      }, null, this);
+    value: function db(dbName, isNew) {
+      isNew = isNew || false;
+      return this.r.branch(isNew, this.r.branch(this.r.dbList().contains(dbName), this.r.branch(this.r.dbDrop(dbName), this.r.dbCreate(dbName), false), this.r.dbCreate(dbName)), this.r.branch(this.r.dbList().contains(dbName), false, this.r.dbCreate(dbName)));
     }
   }, {
     key: 'table',
-    value: function table(dbName, tableName) {
-      var tableList;
-      return regeneratorRuntime.async(function table$(context$2$0) {
-        while (1) switch (context$2$0.prev = context$2$0.next) {
-          case 0:
-            if (!tableName) {
-              context$2$0.next = 13;
-              break;
-            }
+    value: function table(dbName, tableName, isNew) {
+      var _this = this;
 
-            context$2$0.next = 3;
-            return regeneratorRuntime.awrap(this.r.db(dbName).tableList());
-
-          case 3:
-            tableList = context$2$0.sent;
-
-            if (!(tableList.indexOf(tableName) === -1)) {
-              context$2$0.next = 10;
-              break;
-            }
-
-            context$2$0.next = 7;
-            return regeneratorRuntime.awrap(this.r.db(dbName).tableCreate(tableName));
-
-          case 7:
-            return context$2$0.abrupt('return', context$2$0.sent);
-
-          case 10:
-            return context$2$0.abrupt('return', 'exists');
-
-          case 11:
-            context$2$0.next = 14;
-            break;
-
-          case 13:
-            throw Error('arguments length error');
-
-          case 14:
-          case 'end':
-            return context$2$0.stop();
-        }
-      }, null, this);
+      isNew = isNew || false;
+      return this.r.branch(isNew, this.r.branch(this.r.db(dbName).tableList().contains(tableName), this.r.db(dbName).tableDrop(tableName)['do'](function () {
+        return _this.r.db(dbName).tableCreate(tableName);
+      }), this.r.db(dbName).tableCreate(tableName)), this.r.branch(this.r.db(dbName).tableList().contains(tableName), true, this.r.db(dbName).tableCreate(tableName)));
     }
   }, {
     key: 'index',
     value: function index(dbName, tableName, indexName) {
-      var indexList, create;
-      return regeneratorRuntime.async(function index$(context$2$0) {
-        while (1) switch (context$2$0.prev = context$2$0.next) {
-          case 0:
-            if (!indexName) {
-              context$2$0.next = 16;
-              break;
-            }
+      var _this2 = this;
 
-            context$2$0.next = 3;
-            return regeneratorRuntime.awrap(this.r.db(dbName).table(tableName).indexList());
-
-          case 3:
-            indexList = context$2$0.sent;
-
-            if (!(indexList.indexOf(indexName) === -1)) {
-              context$2$0.next = 13;
-              break;
-            }
-
-            context$2$0.next = 7;
-            return regeneratorRuntime.awrap(this.r.db(dbName).table(tableName).indexCreate(indexName));
-
-          case 7:
-            create = context$2$0.sent;
-            context$2$0.next = 10;
-            return regeneratorRuntime.awrap(this.r.db(dbName).table(tableName).indexWait(indexName));
-
-          case 10:
-            return context$2$0.abrupt('return', create);
-
-          case 13:
-            return context$2$0.abrupt('return', 'exists');
-
-          case 14:
-            context$2$0.next = 17;
-            break;
-
-          case 16:
-            throw Error('arguments length error');
-
-          case 17:
-          case 'end':
-            return context$2$0.stop();
-        }
-      }, null, this);
+      return this.r.branch(this.r.db(dbName).table(tableName).indexList().contains(indexName), this.r.db(dbName).table(tableName).indexWait(indexName), this.r.branch(this.r.db(dbName).table(tableName).info()('primary_key').eq(indexName), this.r.db(dbName).table(tableName).indexWait(indexName), this.r.db(dbName).table(tableName).indexCreate(indexName)['do'](function () {
+        return _this2.r.db(dbName).table(tableName).indexWait(indexName);
+      })));
     }
   }]);
 

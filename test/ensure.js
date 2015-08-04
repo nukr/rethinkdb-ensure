@@ -20,19 +20,24 @@ after(async (done) => {
 
 describe('ensure', () => {
   it('db create', () => {
-    return expect(ensure.db(dbName)).to.eventually.have.property('dbs_created', 1)
+    return expect(ensure.db(dbName, true)).to.eventually.have.property('dbs_created', 1)
   })
   it('table create', () => {
-    return expect(ensure.table(dbName, 'test_table')).to.eventually.have.property('tables_created', 1)
+    return expect(ensure.table(dbName, 'test_table', true)).to.eventually.have.property('tables_created', 1)
   })
   it('index create', () => {
-    return expect(ensure.index(dbName, 'test_table', 'createdAt')).to.eventually.have.property('created', 1)
+    return expect(ensure.index(dbName, 'test_table', 'createdAt'))
+      .to
+      .eventually
+      .have
+      .deep
+      .property('[0].index', 'createdAt')
   })
   it('db exists', () => {
-    return expect(ensure.db(dbName)).to.eventually.be.equal('exists')
+    return expect(ensure.db(dbName, true)).to.eventually.be.equal('exists')
   })
   it('table exists', () => {
-    return expect(ensure.table(dbName, 'test_table')).to.eventually.be.equal('exists')
+    return expect(ensure.table(dbName, 'test_table', true)).to.eventually.be.equal('exists')
   })
   it('index exists', () => {
     return expect(ensure.table(dbName, 'test_table', 'createdAt')).to.eventually.be.equal('exists')

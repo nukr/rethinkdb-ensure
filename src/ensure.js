@@ -1,29 +1,55 @@
-import xtype from 'xtypejs'
-xtype.options.setNameScheme('compact')
+export default class Ensure {
+  constructor (r) {
+    this.r = r
+  }
 
-export let ensureNewDb = (dbName) => {
-  r.branch(
-    r.dbList().contains(dbName),
-    r.branch(
-      r.dbDrop(dbName),
-      r.dbCreate(dbName),
-      false
-    ),
-    r.dbCreate(dbName)
-  )
-  return r.db(dbName)
-}
+  db (dbName, isNew) {
+    isNew = isNew || false
+    return this.r.branch(
+      isNew,
+      this.r.branch(
+        this.r.dbList().contains(dbName),
+        this.r.branch(this.r.dbDrop(dbName), this.r.dbCreate(dbName), false),
+        this.r.dbCreate(dbName)
+      ),
+      this.r.branch(
+        this.r.dbList().contains(dbName),
+        false,
+        this.r.dbCreate(dbName)
+      )
+    )
+  }
 
-export let ensureDb = (dbName) => {
-  return r.branch(
-    r.dbList().contains(dbName),
-    true,
-    r.dbCreate(dbName)
-  )
-}
+  table (dbName, tableName, isNew) {
+    isNew = isNew || false
+    return this.r.branch(
+      isNew,
+      this.r.branch(
+        this.r.db(dbName).tableList().contains(tableName),
+        this.r.db(dbName).tableDrop(tableName).do(() => {
+          return this.r.db(dbName).tableCreate(tableName)
+        }),
+        this.r.db(dbName).tableCreate(tableName)
+      ),
+      this.r.branch(
+        this.r.db(dbName).tableList().contains(tableName),
+        true,
+        this.r.db(dbName).tableCreate(tableName)
+      )
+    )
+  }
 
-export let ensureTable = (tableName) => {
-}
-
-export let ensureIndex = (indexName) => {
+  index (dbName, tableName, indexName) {
+    return this.r.branch(
+      this.r.db(dbName).table(tableName).indexList().contains(indexName),
+      this.r.db(dbName).table(tableName).indexWait(indexName),
+      this.r.branch(
+        this.r.db(dbName).table(tableName).info()('primary_key').eq(indexName),
+        this.r.db(dbName).table(tableName).indexWait(indexName),
+        this.r.db(dbName).table(tableName).indexCreate(indexName).do(() => {
+          return this.r.db(dbName).table(tableName).indexWait(indexName)
+        })
+      )
+    )
+  }
 }
