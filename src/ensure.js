@@ -9,7 +9,9 @@ export default class Ensure {
       isNew,
       this.r.branch(
         this.r.dbList().contains(dbName),
-        this.r.branch(this.r.dbDrop(dbName), this.r.dbCreate(dbName), false),
+        this.r.dbDrop(dbName).do(() => {
+          return this.r.dbCreate(dbName)
+        }),
         this.r.dbCreate(dbName)
       ),
       this.r.branch(
